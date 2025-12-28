@@ -1,0 +1,89 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: bond1-odf-controlplane0
+  namespace: openshift-nmstate
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: controlplane0.ocp4.azurelocal.lab   # Update Hostname 
+  desiredState:
+    interfaces:
+      # =========================
+      # Physical NICs
+      # =========================
+      - name: ens35                          # Update NIC
+        type: ethernet
+        state: up
+        mtu: 1500
+
+      - name: ens36                           #Update NIC
+        type: ethernet
+        state: up
+        mtu: 1500
+
+      # =========================
+      # Bond interface
+      # =========================
+      - name: bond1                          #Bond name 
+        description: Bond for OpenShift Data Foundation Storage Networks
+        type: bond
+        state: up
+        mtu: 1500
+        link-aggregation:
+          mode: active-backup                # Update policy 
+          options:
+            miimon: "100"
+          port:
+            - ens35
+            - ens36
+        ipv4:
+          enabled: false
+
+      # =========================
+      # VLAN 40 – ODF Public
+      # =========================
+      - name: bond1.40
+        type: vlan
+        state: up
+        mtu: 1500
+        vlan:
+          base-iface: bond1
+          id: 40                        #ODF public Network VLAN ID 
+        ipv4:
+          enabled: false
+
+      # =========================
+      # VLAN 50 – ODF Cluster
+      # =========================
+      - name: bond1.50
+        type: vlan
+        state: up
+        mtu: 1500
+        vlan:
+          base-iface: bond1
+          id: 50                          # ODF Cluster Network VLAN ID 
+        ipv4:
+          enabled: false
+
+      # =========================
+      # ODF Public Shim (STATIC IP)
+      # =========================
+      - name: odf-pub-shim
+        description: Shim interface used to connect host to ODF public Multus network
+        type: mac-vlan
+        state: up
+        mtu: 1500
+        mac-vlan:
+          base-iface: bond1.40
+          mode: bridge
+          promiscuous: true
+        ipv4:
+          enabled: true
+          dhcp: false
+          address:
+            - ip: 10.10.0.5
+              prefix-length: 22
+    routes:
+     config:
+       - destination: 10.10.0.0/22
+         next-hop-interface: odf-pub-shim

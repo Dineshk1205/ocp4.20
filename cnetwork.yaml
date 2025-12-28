@@ -1,0 +1,17 @@
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: odf-cluster-net
+  namespace: openshift-storage
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "type": "macvlan",
+      "master": "bond1.50",       # Update Bond name 
+      "mode": "bridge",
+      "ipam": {
+        "type": "whereabouts",
+        "range": "10.10.20.0/22"   # Updated Subnet Range 
+      }
+    }

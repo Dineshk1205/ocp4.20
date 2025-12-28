@@ -1,0 +1,36 @@
+apiVersion: ocs.openshift.io/v1
+kind: StorageCluster
+metadata:
+  name: ocs-storagecluster
+  namespace: openshift-storage
+  annotations:
+    cluster.ocs.openshift.io/local-devices: "true"
+spec:
+  resourceProfile: lean
+  flexibleScaling: false
+
+  monDataDirHostPath: /var/lib/rook
+
+  network:
+    provider: multus
+    selectors:
+      public: openshift-storage/odf-public-net
+      cluster: openshift-storage/odf-cluster-net
+
+  encryption:
+    enable: false
+
+  storageDeviceSets:
+    - name: localceph
+      count: 3
+      replica: 3
+      dataPVCTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          volumeMode: Block
+          storageClassName: localceph
+          resources:
+            requests:
+              storage: 200Gi
+      resources: {}
