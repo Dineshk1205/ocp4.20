@@ -12,6 +12,6 @@ spec:
       "mode": "bridge",
       "ipam": {
         "type": "whereabouts",
-        "range": "10.10.20.0/22"   # Updated Subnet Range 
+        "range": "10.20.20.0/22"   # Updated Subnet Range 
       }
     }
