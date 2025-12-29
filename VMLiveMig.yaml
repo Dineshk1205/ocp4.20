@@ -1,0 +1,20 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: nad-live-migrate-br1-vlan30
+  namespace: openshift-cnv
+spec:
+  config: '{
+    "cniVersion": "0.3.1",
+    "name": "br1-network",
+    "type": "ovn-k8s-cni-overlay",
+    "topology": "localnet",
+    "netAttachDefName": "openshift-cnv/nad-live-migrate-br1-vlan30",
+    "vlanID": 30,
+    "mtu": 1500,
+    "ipam": {
+      "type": "whereabouts",
+      "range": "172.16.30.0/24",
+      "range_start": "172.16.30.5",
+      "range_end": "172.16.30.15"
+    }
